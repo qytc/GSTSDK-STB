@@ -1,0 +1,8 @@
+<resources>
+    <string name="checking_and_waiting">正在验证，请稍后...</string>
+    <string name="sdkAppId_invalid">无效的SDK应用ID</string>
+    <string name="userId_not_empty">用户名不得为空</string>
+    <string name="roomNo_invalid">无效的房间号</string>
+    <string name="get_sig_fail">网络异常，获取签名失败</string>
+    <string name="join_room_fail">网络异常，加入房间失败</string>
+</resources>
