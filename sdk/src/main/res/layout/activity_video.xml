@@ -10,6 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <com.tencent.rtmp.ui.TXCloudVideoView
+        android:id="@+id/share_video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
+
     <!-- Board -->
     <FrameLayout
         android:id="@+id/board_view_container"

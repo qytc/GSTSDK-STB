@@ -73,6 +73,8 @@ public class VideoActivity extends Activity implements View.OnClickListener {
     private FrameLayout mBoardController;
     private boolean chairmanMuteMicAll = false;
     private String mChairman;
+    private TRTCCloudListenerImpl mTrtcCloudListener;
+    private TXCloudVideoView mShare_video_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +117,20 @@ public class VideoActivity extends Activity implements View.OnClickListener {
 
         mTvRoomInfo = findViewById(R.id.tv_room_info);
         mTvRoomInfo.setText("房间号:" + mRoomNo);
+
+        mShare_video_view = findViewById(R.id.share_video_view);
     }
 
     private void initRoomParams() {
-        trtcCloud = TRTCCloud.sharedInstance(this);//创建 TRTC SDK 实例
-        trtcCloud.setListener(new TRTCCloudListenerImpl(this));
+        if (trtcCloud == null) {
+            trtcCloud = TRTCCloud.sharedInstance(this);//创建 TRTC SDK 实例
+        }
+
+        if (mTrtcCloudListener == null) {
+            mTrtcCloudListener = new TRTCCloudListenerImpl(this);
+        }
+
+        trtcCloud.setListener(mTrtcCloudListener);
 
         // 预览前配置默认参数
         TRTCCloudDef.TRTCVideoEncParam encParam = new TRTCCloudDef.TRTCVideoEncParam();     // 大画面的编码器参数设置
@@ -422,24 +433,20 @@ public class VideoActivity extends Activity implements View.OnClickListener {
                     mShareScreen = true;
                     mShareUserId = userId;
 
-                    TXCloudVideoView renderView = activity.mVideoViewLayout.onMemberEnter(userId);
                     activity.mVideoViewLayout.setCanZoomFullscreen(false);
-                    if (renderView != null) {
-                        activity.mVideoViewLayout.focusVideoView(renderView);//放大画面
-                        activity.trtcCloud.setRemoteSubStreamViewFillMode(userId, TRTCCloudDef.TRTC_VIDEO_RENDER_MODE_FIT);
-                        activity.trtcCloud.startRemoteSubStreamView(userId, renderView);
-                    }
-                } else if (mShareScreen && userId != null && userId.equals(mShareUserId)) {
-                    TXCloudVideoView renderView = activity.mVideoViewLayout.onMemberEnter(userId);
-                    activity.mVideoViewLayout.setCanZoomFullscreen(true);
-                    if (renderView != null) {
-                        activity.trtcCloud.setRemoteViewFillMode(userId, TRTCCloudDef.TRTC_VIDEO_RENDER_MODE_FIT);//适应模式
-                        activity.trtcCloud.startRemoteView(userId, renderView);
-                    }
+                    activity.mShare_video_view.setVisibility(View.VISIBLE);
+                    activity.mShare_video_view.setUserId(userId);
 
-                    if (activity.mVideoViewLayout.mBroadcastArr != null) {
-                        activity.mVideoViewLayout.setScreen();
-                    }
+                    activity.trtcCloud.startRemoteSubStreamView(userId, activity.mShare_video_view);
+
+                } else if (mShareScreen && userId != null && userId.equals(mShareUserId)) {
+                    activity.mVideoViewLayout.setCanZoomFullscreen(true);
+                    TXCloudVideoView renderView = activity.mVideoViewLayout.onMemberEnter(userId);
+
+                    activity.trtcCloud.stopRemoteSubStreamView(userId);
+                    activity.mShare_video_view.setVisibility(View.INVISIBLE);
+
+                    activity.trtcCloud.startRemoteView(userId, renderView);
 
                     mShareUserId = null;
                     mShareScreen = false;
@@ -459,7 +466,7 @@ public class VideoActivity extends Activity implements View.OnClickListener {
          * 首帧渲染回调
          */
         @Override
-        public void onFirstVideoFrame(String userId, int width, int height,int i) {
+        public void onFirstVideoFrame(String userId, int width, int height, int i) {
             Log.i(TAG, "--onFirstVideoFrame() , userId = " + userId);
         }
 
@@ -655,6 +662,7 @@ public class VideoActivity extends Activity implements View.OnClickListener {
             mTvMicStatus.setText("麦克风：关");
         }
         mIsEnableAudio = status;
+        sendKeepAlive();
     }
 
     //显示摄像头开关
@@ -666,6 +674,7 @@ public class VideoActivity extends Activity implements View.OnClickListener {
             mTvVideoStatus.setText("摄像头：关");
         }
         mIsEnableVideo = status;
+        sendKeepAlive();
     }
 
     /**
@@ -726,24 +735,14 @@ public class VideoActivity extends Activity implements View.OnClickListener {
                 });
     }
 
+    private int connectErrorCount = 0;
+
     private Runnable mStatusRunnable = new Runnable() {
         @Override
         public void run() {
             if (mWebSocket != null && mWebSocket.isOpen()) {
-                if (mStatusBean == null) {
-                    mStatusBean = new StatusBean();
-                    StatusBean.Data data = new StatusBean.Data();
-                    mStatusBean.setData(data);
-                }
-                mStatusBean.setCmd("keepAlive");
-                mStatusBean.getData().setAcctno(mUserId);
-                mStatusBean.getData().setCamera(mIsEnableVideo ? "1" : "0");
-                mStatusBean.getData().setDeviceId("stb-" + mUserId);
-                mStatusBean.getData().setMic(mIsEnableAudio ? "1" : "0");
-                mStatusBean.getData().setSpeaker("1");
-                mStatusBean.getData().setInRoom("1");
-                mStatusBean.getData().setRoomNo(String.valueOf(mRoomNo));
-                mWebSocket.send(JSON.toJSONString(mStatusBean));
+                connectErrorCount = 0;
+                sendKeepAlive();
                 if (mHandler != null) {
                     mHandler.postDelayed(this, 5000);
                 }
@@ -752,10 +751,37 @@ public class VideoActivity extends Activity implements View.OnClickListener {
                 if (mHandler != null) {
                     mHandler.removeCallbacks(this);
                 }
+
+                connectErrorCount++;
+                if (connectErrorCount >= 2) {
+                    ToastUtils.toast(VideoActivity.this, "网络连接异常，请重新加入房间");
+                    exitRoom();
+                    return;
+                }
+
                 startSocket();
             }
         }
     };
+
+    private void sendKeepAlive() {
+        if (mStatusBean == null) {
+            mStatusBean = new StatusBean();
+            StatusBean.Data data = new StatusBean.Data();
+            mStatusBean.setData(data);
+        }
+        mStatusBean.setCmd("keepAlive");
+        mStatusBean.getData().setAcctno(mUserId);
+        mStatusBean.getData().setCamera(mIsEnableVideo ? "1" : "0");
+        mStatusBean.getData().setDeviceId("stb-" + mUserId);
+        mStatusBean.getData().setMic(mIsEnableAudio ? "1" : "0");
+        mStatusBean.getData().setSpeaker("1");
+        mStatusBean.getData().setInRoom("1");
+        mStatusBean.getData().setRoomNo(String.valueOf(mRoomNo));
+        if (mWebSocket != null && mWebSocket.isOpen()) {
+            mWebSocket.send(JSON.toJSONString(mStatusBean));
+        }
+    }
 
     WebSocket.StringCallback mStringCallback = new WebSocket.StringCallback() {
         @Override
@@ -830,6 +856,11 @@ public class VideoActivity extends Activity implements View.OnClickListener {
                 for (int i = acctnoArray.length; i < userIds.length; i++) {
                     userIds[i] = "-1";
                 }
+                mVideoViewLayout.setBroadcastArr(userIds);
+                mVideoViewLayout.setScreen();
+                return;
+            } else if (acctnoArray.length > 5) {
+                String[] userIds = Arrays.copyOf(acctnoArray, 5);
                 mVideoViewLayout.setBroadcastArr(userIds);
                 mVideoViewLayout.setScreen();
                 return;
