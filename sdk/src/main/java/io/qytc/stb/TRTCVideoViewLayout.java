@@ -149,6 +149,18 @@ public class TRTCVideoViewLayout extends RelativeLayout {
         }
     }
 
+    public TXCloudVideoView getVideoViewByUserId(String userId) {
+        if (userId == null) return null;
+
+        for (TXCloudVideoView videoView : mVideoViewArr) {
+            if (videoView != null && userId.equals(videoView.getUserId())) {
+                return videoView;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * 有视频流需要加入
      */

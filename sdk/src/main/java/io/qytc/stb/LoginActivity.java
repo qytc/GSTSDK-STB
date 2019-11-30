@@ -142,29 +142,39 @@ public class LoginActivity extends Activity {
 
     //加入视频房间
     private void enterRoom() {
-        TrtcManager trtcManager = TrtcManager.getInstance();
-        trtcManager.init(this, mSdkAppId);
+        Intent intent = new Intent(LoginActivity.this, VideoActivity.class);
+        intent.putExtra(ThirdLoginConstant.SDKAPPID, mSdkAppId);
+        intent.putExtra(ThirdLoginConstant.USERID, mUserId);
+        intent.putExtra(ThirdLoginConstant.USERSIG, mUserSig);
+        intent.putExtra(ThirdLoginConstant.ROOMID, Integer.valueOf(mRoomNo));
+        intent.putExtra(ThirdLoginConstant.ROLE, mRole);
 
-        trtcManager.login(mUserId, mUserSig, new TIMCallBack() {
-            @Override
-            public void onError(int i, String s) {
-                showErrorMsg("登陆失败");
-            }
+        startActivity(intent);
+        finish();
 
-            @Override
-            public void onSuccess() {
-                mProgressDialog.dismiss();
-                Intent intent = new Intent(LoginActivity.this, VideoActivity.class);
-                intent.putExtra(ThirdLoginConstant.SDKAPPID, mSdkAppId);
-                intent.putExtra(ThirdLoginConstant.USERID, mUserId);
-                intent.putExtra(ThirdLoginConstant.USERSIG, mUserSig);
-                intent.putExtra(ThirdLoginConstant.ROOMID, Integer.valueOf(mRoomNo));
-                intent.putExtra(ThirdLoginConstant.ROLE, mRole);
-
-                startActivity(intent);
-                finish();
-            }
-        });
+//        TrtcManager trtcManager = TrtcManager.getInstance();
+//        trtcManager.init(this, mSdkAppId);
+//
+//        trtcManager.login(mUserId, mUserSig, new TIMCallBack() {
+//            @Override
+//            public void onError(int i, String s) {
+//                showErrorMsg("登陆失败");
+//            }
+//
+//            @Override
+//            public void onSuccess() {
+//                mProgressDialog.dismiss();
+//                Intent intent = new Intent(LoginActivity.this, VideoActivity.class);
+//                intent.putExtra(ThirdLoginConstant.SDKAPPID, mSdkAppId);
+//                intent.putExtra(ThirdLoginConstant.USERID, mUserId);
+//                intent.putExtra(ThirdLoginConstant.USERSIG, mUserSig);
+//                intent.putExtra(ThirdLoginConstant.ROOMID, Integer.valueOf(mRoomNo));
+//                intent.putExtra(ThirdLoginConstant.ROLE, mRole);
+//
+//                startActivity(intent);
+//                finish();
+//            }
+//        });
     }
 
     //弹密码输入框

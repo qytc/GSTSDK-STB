@@ -8,6 +8,10 @@ android {
         versionCode 2
         versionName "1.1"
 
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+
     }
     buildTypes {
         release {
@@ -19,7 +23,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.tencent.liteav:LiteAVSDK_TRTC:6.6.7458'
+    implementation files('libs/LiteAVSDK_TRTC_4.aar')
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.alibaba:fastjson:1.2.58'
     implementation 'com.koushikdutta.async:androidasync:2.2.1'
