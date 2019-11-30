@@ -167,7 +167,7 @@ public class VideoActivity extends Activity implements View.OnClickListener {
 
         trtcCloud.setLocalViewFillMode(TRTCCloudDef.TRTC_VIDEO_RENDER_MODE_FIT);//适应模式
         trtcCloud.setAudioRoute(TRTCCloudDef.TRTC_AUDIO_ROUTE_SPEAKER);//音频线路为：扬声器
-        trtcCloud.setGSensorMode(TRTCCloudDef.TRTC_GSENSOR_MODE_DISABLE);//UI 不适应布局 （无重力感应）
+        trtcCloud.setGSensorMode(TRTCCloudDef.TRTC_GSENSOR_MODE_UIFIXLAYOUT);//UI 不适应布局 （无重力感应）
 
         trtcCloud.enterRoom(trtcParams, TRTCCloudDef.TRTC_APP_SCENE_LIVE);
     }

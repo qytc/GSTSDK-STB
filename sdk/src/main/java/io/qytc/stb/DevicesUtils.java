@@ -29,6 +29,10 @@ public class DevicesUtils {
             trtcCloud.setLocalViewRotation(TRTCCloudDef.TRTC_VIDEO_ROTATION_0);
             trtcCloud.setVideoEncoderRotation(TRTCCloudDef.TRTC_VIDEO_ROTATION_0);
             trtcCloud.setVideoEncoderMirror(true);//画面镜像
+        }else {
+            trtcCloud.setLocalViewRotation(TRTCCloudDef.TRTC_VIDEO_ROTATION_0);
+            trtcCloud.setVideoEncoderRotation(TRTCCloudDef.TRTC_VIDEO_ROTATION_0);
+            trtcCloud.setVideoEncoderMirror(true);//画面镜像
         }
         return trtcCloud;
     }
