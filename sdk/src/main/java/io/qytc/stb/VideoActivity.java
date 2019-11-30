@@ -81,6 +81,7 @@ public class VideoActivity extends Activity implements View.OnClickListener {
     private TXCloudVideoView mShare_video_view;
     private TextView mTvNetSpeed;
     private String mAliveJsonStr;
+    private StatusBean mStatusBean;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -681,7 +682,9 @@ public class VideoActivity extends Activity implements View.OnClickListener {
             mTvMicStatus.setText("麦克风：关");
         }
         mIsEnableAudio = status;
-        initAliveData();
+
+        mStatusBean.getData().setMic(mIsEnableAudio ? "1" : "0");
+        mAliveJsonStr = JSON.toJSONString(mStatusBean);
         sendKeepAlive();
     }
 
@@ -694,7 +697,9 @@ public class VideoActivity extends Activity implements View.OnClickListener {
             mTvVideoStatus.setText("摄像头：关");
         }
         mIsEnableVideo = status;
-        initAliveData();
+
+        mStatusBean.getData().setCamera(mIsEnableVideo ? "1" : "0");
+        mAliveJsonStr = JSON.toJSONString(mStatusBean);
         sendKeepAlive();
     }
 
@@ -747,8 +752,8 @@ public class VideoActivity extends Activity implements View.OnClickListener {
     }
 
     private void initAliveData() {
-        StatusBean statusBean = new StatusBean();
-        statusBean.setCmd("keepAlive");
+        mStatusBean = new StatusBean();
+        mStatusBean.setCmd("keepAlive");
 
         StatusBean.Data data = new StatusBean.Data();
         data.setAcctno(mUserId);
@@ -758,9 +763,9 @@ public class VideoActivity extends Activity implements View.OnClickListener {
         data.setSpeaker("1");
         data.setInRoom("1");
         data.setRoomNo(String.valueOf(mRoomNo));
-        statusBean.setData(data);
+        mStatusBean.setData(data);
 
-        mAliveJsonStr = JSON.toJSONString(statusBean);
+        mAliveJsonStr = JSON.toJSONString(mStatusBean);
     }
 
     private Runnable mTaskRunnable = new Runnable() {

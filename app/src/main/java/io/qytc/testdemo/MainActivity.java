@@ -32,10 +32,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         findViewById(R.id.btn_join_room).setOnClickListener(this);
 
-        mEtUserId.setText("11111");
-        mEtUserId.setSelection(5);
-
-        mEtRoomNo.setText("444444");
+//        mEtUserId.setText("11111");
+//        mEtUserId.setSelection(5);
+//
+//        mEtRoomNo.setText("444444");
     }
 
 
