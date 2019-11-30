@@ -448,7 +448,7 @@ public class VideoActivity extends Activity implements View.OnClickListener {
                     activity.trtcCloud.startRemoteSubStreamView(userId, activity.mShare_video_view);
 
                 } else if (mShareScreen && userId != null && userId.equals(mShareUserId)) {
-
+                    activity.mVideoViewLayout.setCanZoomFullscreen(true);
                     activity.trtcCloud.stopRemoteSubStreamView(mShareUserId);
                     activity.mShare_video_view.setVisibility(View.INVISIBLE);
 
