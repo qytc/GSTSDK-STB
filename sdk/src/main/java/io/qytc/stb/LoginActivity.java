@@ -52,6 +52,7 @@ public class LoginActivity extends Activity {
         mUserId = intent.getStringExtra(ThirdLoginConstant.USERID);
         mRoomNo = intent.getIntExtra(ThirdLoginConstant.ROOMID, -1);
         int role = intent.getIntExtra(ThirdLoginConstant.ROLE, -1);
+        mSdkAppId=intent.getIntExtra(ThirdLoginConstant.SDKAPPID,mSdkAppId);
         if (role == ThirdLoginConstant.Anchor) {
             mRole = VideoActivity.LIVER;
         } else {
